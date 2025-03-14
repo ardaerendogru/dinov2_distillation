@@ -3,7 +3,8 @@ __pycache__/
 *.pyc
 *.log
 logs/
-checkpoints/
+!checkpoints/.gitkeep
+checkpoints/**
 wandb/
 .ipynb_checkpoints
 .DS_Store
