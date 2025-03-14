@@ -46,10 +46,8 @@ loss:
         window_shapes: [1, 1]
         self_query: True
         softmax_scale: [5.0, 5.0]
-        dis_freq: high
         num_heads: 16
         name: scalekd_res4
-        use_this: true
     - type: scalekd
       weight: 1.0
       kwargs:
@@ -57,10 +55,8 @@ loss:
         window_shapes: [1, 1]
         self_query: False
         softmax_scale: [5.0, 5.0]
-        dis_freq: high
         num_heads: 24
         name: scalekd_res5
-        use_this: true
 
 
 train:

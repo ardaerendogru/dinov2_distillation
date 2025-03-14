@@ -12,7 +12,6 @@ from typing import Optional, Dict, Tuple
 class ScaleKD(nn.Module):
     def __init__(self,
                  name,
-                 use_this,
                  alpha,
                  student_dims,
                  teacher_dims,
@@ -22,12 +21,10 @@ class ScaleKD(nn.Module):
                  window_shapes=(1,1),
                  self_query=True,
                  softmax_scale=[1,1],
-                 dis_freq='high',
                  num_heads=8
                  ):
         super().__init__()
         self.alpha = alpha
-        self.dis_freq = dis_freq
         self.self_query = self_query
         self.projector_0 = AttentionProjector(student_dims, teacher_dims, query_hw, pos_dims, window_shapes=window_shapes, self_query=self_query, softmax_scale=softmax_scale[0], num_heads=num_heads)
         self.projector_1 = AttentionProjector(student_dims, teacher_dims, query_hw, pos_dims, window_shapes=window_shapes, self_query=self_query, softmax_scale=softmax_scale[1], num_heads=num_heads)
