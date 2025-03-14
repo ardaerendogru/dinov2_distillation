@@ -1,0 +1,90 @@
+wandb:
+  project: "distillation"  # Project name in W&B
+  tags: ["distillation", "convnext", "dinov2"]  # Searchable tags
+  notes: "Knowledge distillation from DINOv2 to convnext"  # Run description
+
+
+student:
+  model_name: stdc_2
+  student_keys: [res5, res4]
+  checkpoint_path: /home/arda/dinov2/distillation/checkpoints/STDCNet2.pth
+
+
+teacher:
+  model_name: dinov2_vits14
+
+
+
+data_transform:
+  global_crops_scale: [0.08, 1.0]
+  global_crops_size: [224, 224]
+
+
+
+
+optimizer:
+  type: AdamW
+  kwargs:
+    lr: 1e-3
+    betas: [0.9, 0.999]
+    weight_decay: 0.01
+  scheduler:
+    type: CosineAnnealingLR
+    kwargs:
+      T_max: 480
+      eta_min: 1e-5
+    monitor: val_loss
+    interval: epoch
+    frequency: 1
+
+loss:
+  losses:
+    - type: scalekd
+      weight: 1
+      kwargs:
+        alpha: [0.08, 0.06]
+        window_shapes: [1, 1]
+        self_query: True
+        softmax_scale: [5.0, 5.0]
+        dis_freq: high
+        num_heads: 16
+        name: scalekd_res4
+        use_this: true
+    - type: scalekd
+      weight: 1.0
+      kwargs:
+        alpha: [0.08, 0.06]
+        window_shapes: [1, 1]
+        self_query: False
+        softmax_scale: [5.0, 5.0]
+        dis_freq: high
+        num_heads: 24
+        name: scalekd_res5
+        use_this: true
+
+
+train:
+  max_epochs: 480
+  accelerator: gpu
+  devices: [0,1]
+  num_nodes: 1
+  strategy: ddp
+  # resume_from_checkpoint: /home/arda/dinov2/distillation/logs/stdc2/distillation/version_229/checkpoints/last.ckpt  # Add this line
+  accumulate_grad_batches: 2  # Accumulate gradients over 4 batches
+
+  
+data_loader:
+  data_dir: [/home/arda/data/train2017]
+  #val_dir:  also a list
+  batch_size: 256 #per gpu
+  num_workers: 8
+  
+
+
+
+checkpoints:
+  dirpath: checkpoints
+  monitor:  val_scalekd_res5_spatial_similarity
+  mode: max
+  save_top_k: 1
+
