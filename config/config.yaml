@@ -5,7 +5,7 @@ wandb:
 
 
 student:
-  model_name: swin_tiny
+  model_name: stdc_1
   student_keys: [res5, res4]
   # checkpoint_path: /home/arda/dinov2_finalize/dinov2/distillation/checkpoints/STDCNet1.pkl
 
