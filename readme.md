@@ -9,7 +9,7 @@ This project implements a flexible and powerful knowledge distillation pipeline 
 ### Key Features
 
 - 🔄 **Flexible Model Support**: Distill from DINOv2 ViT models to various student architectures (ConvNeXt, Swin, STDC)
-- 🧠 **Advanced Distillation Techniques**: Implements Scale-KD and other state-of-the-art knowledge distillation methods
+- 🧠 **Advanced Distillation Techniques**: Implements Scale-KD distillation method
 - 📊 **Comprehensive Monitoring**: Integration with Weights & Biases and TensorBoard for experiment tracking
 - ⚡ **Efficient Training**: Distributed training support with PyTorch Lightning
 - 🛠️ **Highly Configurable**: YAML-based configuration system for easy experiment setup
