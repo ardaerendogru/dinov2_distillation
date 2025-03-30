@@ -1,13 +1,13 @@
 wandb:
-  project: "distillation"  # Project name in W&B
+  project: "distillation_final"  # Project name in W&B
   tags: ["distillation", "convnext", "dinov2"]  # Searchable tags
   notes: "Knowledge distillation from DINOv2 to convnext"  # Run description
 
 
 student:
-  model_name: stdc_1
+  model_name: stdc_2
   student_keys: [res5, res4]
-  # checkpoint_path: /home/arda/dinov2_finalize/dinov2/distillation/checkpoints/STDCNet1.pkl
+  checkpoint_path: /home/arda/dinov2_finalize/dinov2_distillation_old/checkpoints/STDCNet2.pkl
 
 
 teacher:
@@ -31,7 +31,7 @@ optimizer:
   scheduler:
     type: CosineAnnealingLR
     kwargs:
-      T_max: 240
+      T_max: 50
       eta_min: 1e-5
     monitor: val_loss
     interval: epoch
@@ -60,19 +60,19 @@ loss:
 
 
 train:
-  max_epochs: 240
+  max_epochs: 50
   accelerator: gpu
   devices: [0,1]
   num_nodes: 1
-  strategy: ddp_find_unused_parameters_true
+  strategy: ddp
   # resume_from_checkpoint: /home/arda/dinov2/distillation/logs/stdc2/distillation/version_229/checkpoints/last.ckpt  # Add this line
   accumulate_grad_batches: 1  # Accumulate gradients over 4 batches
 
   
 data_loader:
-  data_dir: [/home/arda/data/train2017]
+  data_dir: [/home/arda/data/train2017, /storage/disk2/sam_resized]
   #val_dir:  also a list
-  batch_size: 1 #per gpu
+  batch_size: 256 #per gpu
   num_workers: 8
   
 

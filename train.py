@@ -155,7 +155,7 @@ class DistillationTrainer:
         """
         logger.info("Creating data module...")
         data_module = CustomDataModule(
-            train_data_dir=self.cfg['data_loader'].get('train_dir', ['/home/arda/data/train2017']),
+            train_data_dir=self.cfg.data_loader.get('data_dir', ['/home/arda/data/train2017']),
             val_data_dir = self.cfg['data_loader'].get('val_dir', None),
             transform=self.transform,
             batch_size=self.cfg['data_loader']['batch_size'],

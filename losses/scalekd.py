@@ -191,27 +191,30 @@ class AttentionProjector(nn.Module):
         self.student_dims = student_dims
         self.teacher_dims = teacher_dims
 
-        self.proj_pos = nn.Sequential(nn.Conv2d(teacher_dims, teacher_dims, 1),
-                                      nn.ReLU(),
-                                      )
+        # self.proj_pos = nn.Sequential(nn.Conv2d(teacher_dims, teacher_dims, 1),
+        #                               nn.BatchNorm2d(teacher_dims),
+        #                               nn.ReLU(),
+        #                               )
 
-        self.proj_student = nn.Sequential(nn.Conv2d(student_dims, student_dims, 3, stride=1, padding=1),
-                                      nn.BatchNorm2d(student_dims),
+        self.proj_student = nn.Sequential(nn.Conv2d(student_dims, teacher_dims, 1, stride=1, padding=0),
+                                      nn.BatchNorm2d(teacher_dims),
                                       nn.ReLU())
 
-        self.pos_embed = nn.Parameter(torch.zeros(1, student_dims, hw_dims[0], hw_dims[1]), requires_grad=True)
+        self.pos_embed = nn.Parameter(torch.zeros(1, teacher_dims, hw_dims[0], hw_dims[1]), requires_grad=True)
         
-        self.pos_attention = WindowMultiheadPosAttention(teacher_dims, num_heads=num_heads, input_dims=student_dims, pos_dims=pos_dims, window_shapes=window_shapes, softmax_scale=softmax_scale)
+        self.pos_attention = WindowMultiheadPosAttention(teacher_dims, num_heads=num_heads, input_dims=teacher_dims, pos_dims=pos_dims, window_shapes=window_shapes, softmax_scale=softmax_scale)
         self.ffn = FFN(
             embed_dims=teacher_dims,
             feedforward_channels=teacher_dims * 4,
             num_fcs=2,
-            act_cfg=dict(type='ReLU', inplace=True),
+            act_cfg=dict(type='GeLU', inplace=True),
             dropout=0.0,
             add_residual=True
         )
 
         self.norm = nn.LayerNorm([teacher_dims])
+        self.norm_2 = nn.LayerNorm([teacher_dims])
+
 
         if self_query:
             self.query = nn.Embedding(hw_dims[0] * hw_dims[1], teacher_dims)
@@ -233,13 +236,13 @@ class AttentionProjector(nn.Module):
             raise NotImplementedError("There is no query!")
        
         preds_S = self.proj_student(x) + self.pos_embed
-        pos_emb = self.proj_pos(pos_emb)
+        # pos_emb = self.proj_pos(pos_emb)
         pos_emb = torch.flatten(pos_emb.permute(0, 2, 3, 1), 1, 2)
-
+        pred_s_token = torch.flatten(preds_S.permute(0, 2, 3, 1), 1, 2)
         fea_S = self.pos_attention(torch.flatten(preds_S.permute(0, 2, 3, 1), 1, 2), pos_emb)
-        fea_S = self.ffn(self.norm(fea_S))
-
-        return fea_S
+        fea_S = fea_S + pred_s_token
+        fea_S_f = self.ffn(self.norm(fea_S))
+        return self.norm_2(fea_S_f)
     
 
 class WindowMultiheadPosAttention(nn.Module):
@@ -292,7 +295,7 @@ class WindowMultiheadPosAttention(nn.Module):
         B, N, _ = x.shape
         N_out = pos_emb.shape[1]
         N_windows = self.window_shapes[0] * self.window_shapes[1]
-
+        
         q = self.q(pos_emb).reshape(B, N_out, self.num_heads, self.head_dims).permute(0, 2, 1, 3)
         k = self.k(x).reshape(B, N, self.num_heads, self.head_dims).permute(0, 2, 1, 3)
         v = self.v(x).reshape(B, N, self.num_heads, self.head_dims).permute(0, 2, 1, 3)
