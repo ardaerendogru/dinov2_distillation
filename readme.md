@@ -252,7 +252,7 @@ This naming pattern enables the training pipeline to automatically track and log
 
 #### Key Parameters
 
-- **`alpha`**: Controls the scaling factors for attention maps. Higher values emphasize global relationships.
+- **`alpha`**: Controls the contributions of the components of DFM (Direct vs Frequency filtered featuremaps).
 - **`window_shapes`**: Defines the window size for computing attention. `[1, 1]` means global attention.
 - **`self_query`**: When `True`, uses the feature map from the previous TPP part for as query. When `False`, uses learnable queries.
 - **`softmax_scale`**: Temperature parameter for the softmax operation in attention computation.
