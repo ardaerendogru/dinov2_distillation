@@ -312,5 +312,6 @@ tensorboard --logdir logs/
 ## 🙏 Acknowledgements
 
 - [DINOv2](https://github.com/facebookresearch/dinov2) for the original self-supervised learning framework
+- [ScaleKD](https://arxiv.org/abs/2411.06786) for the distillation method.
 - [PyTorch Lightning](https://lightning.ai) for the training framework
 - [Weights & Biases](https://wandb.ai) for experiment tracking
